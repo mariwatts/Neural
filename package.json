@@ -1,0 +1,25 @@
+{
+  "name": "neurons-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEURONS (NeuralNS) — Namespace Protocol for AI Agents on Solana",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n API,WEB -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run start:dev -w @neurons/api",
+    "dev:web": "npm run dev -w @neurons/web",
+    "build": "npm run build -w @neurons/api && npm run build -w @neurons/web",
+    "build:api": "npm run build -w @neurons/api",
+    "build:web": "npm run build -w @neurons/web",
+    "start:api": "npm run start:prod -w @neurons/api",
+    "start:web": "npm run start -w @neurons/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

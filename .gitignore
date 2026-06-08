@@ -1,0 +1,44 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# builds
+dist/
+.next/
+out/
+build/
+
+# env
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# data (bot simulation persistence) — keep the folder, ignore the live db
+apps/api/data/*.json
+!apps/api/data/.gitkeep
+
+# logs
+*.log
+npm-debug.log*
+logs/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# misc
+*.tsbuildinfo
+coverage/
+.turbo/
+
+# deploy artifacts
+neuralns-deploy.tgz
+onchain/.git.bak/
+onchain/target/
+onchain/vendor/
+onchain/.cargo/
