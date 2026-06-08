@@ -1,0 +1,30 @@
+{
+  "name": "@neurons/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "NEURONS NeuralNS — resolver REST API + persistent agent simulation",
+  "scripts": {
+    "build": "nest build",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main.js"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/schedule": "^5.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/schematics": "^11.0.0",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.7",
+    "ts-loader": "^9.5.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.3"
+  }
+}
