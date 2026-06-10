@@ -1,0 +1,6 @@
+/target
+**/*.rs.bk
+test-ledger/
+*.so
+keys/
+node_modules/

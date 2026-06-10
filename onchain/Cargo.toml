@@ -1,0 +1,18 @@
+[package]
+name = "neurons_registry"
+version = "0.1.0"
+edition = "2021"
+description = "NEURONS NeuralNS — native Solana on-chain namespace registry for AI agents (no Anchor)"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+
+[dependencies]
+solana-program = "2.1.0"
+borsh = { version = "1.5.1", features = ["derive"] }
+
+[profile.release]
+overflow-checks = true
+lto = "fat"
+codegen-units = 1
