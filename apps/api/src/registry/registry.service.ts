@@ -2,13 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { StoreService } from '../store/store.service';
 import { OnchainIndexerService } from '../indexer/onchain-indexer.service';
 import { Rng } from '../domain/rng';
-import {
-  derivePda,
-  metadataUri,
-  pubkeyFromSeed,
-  randomPubkey,
-  sha256Hex,
-} from '../domain/solana';
+import { derivePda, metadataUri, sha256Hex } from '../domain/solana';
 import {
   expiryFor,
   priceForLabel,
@@ -400,7 +394,10 @@ export class RegistryService {
     const now = Date.now();
     const nowSec = Math.floor(now / 1000);
     const pricing = priceForLabel(label);
-    const owner = dto.owner?.trim() || randomPubkey();
+    const owner = dto.owner?.trim();
+    if (!owner) {
+      throw new BadRequestException('owner wallet is required');
+    }
 
     const caps =
       dto.capabilities && dto.capabilities.length
@@ -409,7 +406,11 @@ export class RegistryService {
           ? ['web_search', 'summarization']
           : (CAPABILITIES_BY_CATEGORY[cat] ?? ['web_search']).slice(0, 3);
 
-    const host = (dto.endpoint || '').replace(/^https?:\/\//, '') || `${label}.agent.run`;
+    // endpoints stay empty unless the operator actually provided one —
+    // the registry never fabricates URLs or identities
+    const webhook = dto.endpoint
+      ? `https://${dto.endpoint.replace(/^https?:\/\//, '')}`
+      : '';
     const card: AgentCard = {
       name: fqn,
       symbol: 'NEURONS',
@@ -418,16 +419,13 @@ export class RegistryService {
       avatarSeed: sha256Hex(fqn).slice(0, 16),
       capabilities: caps,
       chains: ['solana'],
-      endpoints: {
-        webhook: dto.endpoint || `https://${host}/hook`,
-        websocket: `wss://${host}/ws`,
-      },
-      payment: { accepted: ['SOL', 'USDC'], perTaskUsdc: 0.01 },
-      saidIdentity: pubkeyFromSeed(fqn),
-      reputationScore: 1000,
+      endpoints: { webhook, websocket: '' },
+      payment: { accepted: ['SOL', 'USDC'], perTaskUsdc: 0 },
+      saidIdentity: owner,
+      reputationScore: 0,
       verified: false,
       soulbound: !!dto.soulbound,
-      mint: randomPubkey(),
+      mint: '',
     };
 
     const rec: NameRecord = {
