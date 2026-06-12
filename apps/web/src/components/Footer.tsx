@@ -1,4 +1,4 @@
-import Link from 'next/link';
+﻿import Link from 'next/link';
 
 export default function Footer() {
   return (
@@ -39,7 +39,7 @@ export default function Footer() {
                 </svg>
               </a>
               <a
-                href="https://github.com/hotbrilliant/Neurons"
+                href="https://github.com/mariwatts/Neural"
                 target="_blank"
                 rel="noopener noreferrer"
                 data-hot
