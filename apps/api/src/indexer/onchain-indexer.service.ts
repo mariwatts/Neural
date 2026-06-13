@@ -101,6 +101,7 @@ export class OnchainIndexerService implements OnModuleInit {
               amountSol: r.priceSol,
               timestamp: now,
             });
+            this.notifyTelegram(r);
           }
         }
       });
@@ -108,6 +109,33 @@ export class OnchainIndexerService implements OnModuleInit {
     this.firstLoadDone = true;
     if (fresh.length) this.logger.log(`indexed ${out.length} on-chain names (+${fresh.length} new)`);
     return out.length;
+  }
+
+  /**
+   * Live registration feed → public Telegram channel. Silently off unless
+   * TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID are set (bot must be channel admin).
+   */
+  private notifyTelegram(r: NameRecord): void {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chat = process.env.TELEGRAM_CHAT_ID;
+    if (!token || !chat) return;
+    const tier = r.tier === 'premium' ? 'premium · permanent' : r.tier;
+    const text =
+      `🧠 <b>${r.name}</b> registered\n` +
+      `${tier} · ${r.priceSol} ◎` +
+      (r.verified ? ' · ✅ verified' : '') +
+      `\n<a href="https://neuralns.xyz/agent/${r.name}">agent page</a> · ` +
+      `<a href="https://solscan.io/account/${r.pda}">solscan</a>`;
+    fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chat,
+        text,
+        parse_mode: 'HTML',
+        disable_web_page_preview: true,
+      }),
+    }).catch(() => {});
   }
 
   private decode(pubkey: string, dataB64?: string): NameRecord | null {
