@@ -9,6 +9,7 @@ import ThemeToggle from './ThemeToggle';
 const LINKS = [
   { href: '/explore', label: 'Explore' },
   { href: '/register', label: 'Register' },
+  { href: '/burn', label: 'Burn 🔥' },
   { href: '/buy', label: 'Buy' },
   { href: '/stats', label: 'Stats' },
   { href: '/docs', label: 'Docs' },

@@ -69,6 +69,15 @@ export const api = {
     get<AgentCard>(`/agent/${encodeURIComponent(name)}/capabilities`),
   namesByWallet: (wallet: string) =>
     get<NameRecord[]>(`/names/${encodeURIComponent(wallet)}`),
+  burn: () =>
+    get<{
+      mint: string;
+      initialSupply: number;
+      currentSupply: number;
+      burned: number;
+      burnedPct: number;
+      updatedAt: number;
+    }>('/burn'),
   register: (body: {
     label: string;
     category?: string;

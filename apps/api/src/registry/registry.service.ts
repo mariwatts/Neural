@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { StoreService } from '../store/store.service';
 import { OnchainIndexerService } from '../indexer/onchain-indexer.service';
 import { Rng } from '../domain/rng';
-import { derivePda, metadataUri, sha256Hex } from '../domain/solana';
+import { base58encode, derivePda, metadataUri, sha256Hex } from '../domain/solana';
 import { buildAvatarSvg } from './avatar';
 import {
   expiryFor,
@@ -197,6 +197,67 @@ export class RegistryService {
     const fqn = this.normalizeFqn(name);
     const rec = this.getByName(fqn);
     return buildAvatarSvg(fqn, { verified: rec?.verified ?? false });
+  }
+
+  // ── burn stats (cached 60s) ──
+  private burnCache: { value: unknown; at: number } | null = null;
+
+  /**
+   * $NEURONS deflation, measured directly on-chain: burned = initial supply
+   * minus live supply (token payments burn in-tx; SOL revenue is bought back
+   * and burned by the buyback daemon).
+   */
+  async burnStats() {
+    if (this.burnCache && Date.now() - this.burnCache.at < 60_000) {
+      return this.burnCache.value;
+    }
+    const rpc = process.env.SOLANA_RPC || 'https://api.mainnet-beta.solana.com';
+    const programId = '5dqCWiZvLWD1Nge15UhXyGCGd2rF8uN6nPigdnLRWCv1';
+    const INITIAL_SUPPLY = 1_000_000_000; // pump.fun standard initial supply
+
+    // payment mint lives in the config PDA (offset 66..98)
+    const cfgRes = await fetch(rpc, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getProgramAccounts',
+        params: [programId, { encoding: 'base64', filters: [{ dataSize: 256 }] }],
+      }),
+    });
+    const cfgJson = (await cfgRes.json()) as {
+      result?: { account: { data: [string, string] } }[];
+    };
+    const cfgData = cfgJson?.result?.[0]?.account?.data?.[0];
+    if (!cfgData) throw new NotFoundException('config not found');
+    const mint = base58encode(Buffer.from(cfgData, 'base64').subarray(66, 98));
+
+    const supRes = await fetch(rpc, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        id: 1,
+        method: 'getTokenSupply',
+        params: [mint, { commitment: 'confirmed' }],
+      }),
+    });
+    const supJson = (await supRes.json()) as {
+      result?: { value?: { uiAmount?: number } };
+    };
+    const currentSupply = supJson?.result?.value?.uiAmount ?? INITIAL_SUPPLY;
+    const burned = Math.max(0, INITIAL_SUPPLY - currentSupply);
+    const value = {
+      mint,
+      initialSupply: INITIAL_SUPPLY,
+      currentSupply,
+      burned,
+      burnedPct: (burned / INITIAL_SUPPLY) * 100,
+      updatedAt: Date.now(),
+    };
+    this.burnCache = { value, at: Date.now() };
+    return value;
   }
 
   /** Full record + recent activity for the agent detail page. */

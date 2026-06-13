@@ -120,6 +120,12 @@ export class RegistryController {
     return this.registry.register(dto);
   }
 
+  /** Live burn stats: initial vs current $NEURONS supply (everything burns). */
+  @Get('burn')
+  burn() {
+    return this.registry.burnStats();
+  }
+
   @Get('health')
   health() {
     return { ok: true, ts: Date.now() };

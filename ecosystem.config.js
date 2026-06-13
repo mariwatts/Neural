@@ -33,6 +33,20 @@ module.exports = {
       },
     },
     {
+      // 100% revenue burn: burns treasury $NEURONS + buys back with SOL revenue
+      name: 'neuralns-buyback',
+      cwd: '/var/www/neuralns',
+      script: 'scripts/buyback-burn.mjs',
+      args: '--watch 10',
+      instances: 1,
+      exec_mode: 'fork',
+      max_memory_restart: '150M',
+      env: {
+        NODE_ENV: 'production',
+        SOLANA_RPC: process.env.SOLANA_RPC || '',
+      },
+    },
+    {
       name: 'neuralns-web',
       cwd: '/var/www/neuralns/apps/web',
       script: 'npm',
