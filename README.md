@@ -1,80 +1,49 @@
 # NEURONS · NeuralNS
 
-GdKEzVqS6yU3H1hfwzdiRCXjGE3nsBqRMAj17EqEpump
+**Namespace Protocol for AI Agents on Solana — live on mainnet.**
+Claim a human-readable `name.agent` handle for an autonomous agent, mint a capability-rich **AgentCard** NFT, and get discovered by function — like ENS/SNS, but built for machines.
 
-**Namespace Protocol for AI Agents on Solana.**
-Claim human-readable `name.agent` handles for autonomous agents, mint a capability-rich **AgentCard** NFT, and get discovered by function — like ENS/SNS, but built for machines.
-
-> `$NEURONS` · Solana Mainnet · 2026 · a full-stack reference implementation of the concept in [`cd.md`](./cd.md).
+> Live: **https://neuralns.xyz** · Program: [`5dqCWiZvLWD1Nge15UhXyGCGd2rF8uN6nPigdnLRWCv1`](https://solscan.io/account/5dqCWiZvLWD1Nge15UhXyGCGd2rF8uN6nPigdnLRWCv1) · $NEURONS: [`GdKEzVqS6yU3H1hfwzdiRCXjGE3nsBqRMAj17EqEpump`](https://solscan.io/token/GdKEzVqS6yU3H1hfwzdiRCXjGE3nsBqRMAj17EqEpump)
 
 ---
 
 ## ✦ What this is
 
-A production-grade, **atypical** web experience + working backend for the NeuralNS protocol:
+A working, end-to-end implementation of the NeuralNS protocol (concept in [`cd.md`](./cd.md)):
 
-- **Frontend** — Next.js 15 (App Router, React 19) with a bespoke design system: oversized **Space Grotesk** display + **JetBrains Mono** everywhere a handle/number appears, a live **neural-network canvas** background (on-brand for NEURONS), a custom mint **reticle cursor**, a **⌘K command palette**, smooth scroll, scramble/typewriter text, and a near-black canvas with a single electric-mint accent.
-- **Backend** — NestJS 11 REST API mirroring the protocol spec (`/resolve`, `/reverse`, `/discover`, `/register`, …) over a **crash-safe persisted store**.
-- **Live simulation** — a population of human-like "agents" that continuously register, verify, renew, transfer, mint AgentCards and serve tasks. The state is **persisted to disk and resumes across restarts** — it never resets.
-- **Connect Wallet** — the official **Reown AppKit** modal (Solana adapter), featuring the real Solana wallets (Phantom, Solflare, Backpack…) with their **official logos** pulled from the WalletConnect registry. No logos are hand-made.
+- **On-chain program** (native Solana, no Anchor) — every `.agent` name is a PDA storing owner, resolver, expiry, verified flag, AgentCard mint and metadata URI. All economics (tier prices, payment token, treasury, holder discount) live in a **config PDA** the admin can update in one transaction — no program upgrades to change a price or swap the token.
+- **AgentCard NFT** — Token-2022 NFT (metadata extension, optional soulbound/non-transferable) minted to the owner's wallet in the same transaction as registration.
+- **Registry & resolution** — forward resolution is a trustless PDA read; reverse / discover / explore are served by an indexer over `getProgramAccounts`. **Everything shown on the site is live mainnet data** — nothing simulated.
+- **$NEURONS payments** — pay registration in SOL or in $NEURONS. Token prices track the SOL tier price via an off-chain peg, with the 25% holder discount baked in: paying in $NEURONS always gets the holder rate.
+
+## ✦ Pricing
+
+| Name length | Price | Tier | Expiry |
+|---|---|---|---|
+| 1–4 chars | **5 ◎** | Premium | Permanent |
+| 5–9 chars | **1 ◎ / yr** | Standard | Renewable |
+| 10+ chars | **0.1 ◎ / yr** | Accessible | Renewable |
+| Verified badge | 0.01 ◎ | Add-on | One-time |
+
+$NEURONS holders (≥ ~$10 worth) get **25% off** SOL fees on-chain; the $NEURONS price always equals 75% of the SOL tier value.
 
 ## ✦ Stack
 
 | Layer | Tech |
 |---|---|
-| Web | Next.js 15 · React 19 · TypeScript · Tailwind v4 · framer-motion · cmdk · lenis |
-| Wallet | Reown AppKit `@reown/appkit` + `@reown/appkit-adapter-solana` |
-| Icons | `@web3icons/react` (official wallet + token logos, MIT) |
-| API | NestJS 11 · `@nestjs/schedule` · dependency-free atomic JSON store |
-| Fonts | Space Grotesk · JetBrains Mono · Inter (all OFL, self-hosted via `next/font`) |
+| Program | Native Solana (Rust, no Anchor) · Token-2022 · config PDA economics |
+| Web | Next.js 15 · React 19 · TypeScript · Tailwind v4 · Reown AppKit (Phantom, Solflare, Backpack…) |
+| API | NestJS 11 · on-chain indexer (`getProgramAccounts` via Helius) · atomic JSON store for AgentCard manifests |
+| Ops | pm2 + nginx + Let's Encrypt · price-peg daemon |
 
 ## ✦ Run it
 
 ```bash
-# from the repo root
 npm install          # installs both workspaces
-npm run dev          # API on :4000, web on :3000 (concurrently)
+npm run dev          # API on :4000, web on :3000
 ```
 
-Open **http://localhost:3000**.
-
-Run individually:
-
-```bash
-npm run dev:api      # NestJS on http://localhost:4000/api
-npm run dev:web      # Next.js on http://localhost:3000
-```
-
-Production:
-
-```bash
-npm run build
-npm run start:api    # node dist
-npm run start:web
-```
-
-### Environment
-
-The web app ships with sensible defaults and needs no setup. To override, copy `apps/web/.env.example → apps/web/.env.local`:
-
-```
-NEXT_PUBLIC_PROJECT_ID=<your reown project id>   # default: provided key
-NEXT_PUBLIC_API_URL=http://localhost:4000/api
-```
-
-API env (`apps/api/.env.example`): `PORT`, `WEB_ORIGIN`, `NEURONS_DB`.
-
-## ✦ The simulation (human-like, persistent)
-
-The "bots" are designed to feel like a real, living user base — not a metronome:
-
-- **Diurnal rhythm** — activity ebbs and flows with a 24-hour UTC curve (deep lull ~06:00, peak in the Americas evening).
-- **Poisson arrivals** — events arrive with true exponential inter-arrival times + minute-to-minute jitter, plus occasional organic **bursts** ("fleet deployments").
-- **Believable identities** — names composed from 50+ agent personas across 11 categories (`executor.defi.agent`, `oracle.price.agent`, `sentinel.security.agent`…), with realistic capability sets, base58 pubkeys, reputation distributions (Gaussian, verified agents skew higher) and SOL amounts.
-- **Weighted behaviour** — verified, high-reputation agents serve most of the tasks; registrations taper as the namespace saturates (adoption S-curve).
-- **Persistence** — every mutation is flushed to `apps/api/data/neurons.json` via an **atomic write** (temp-file + rename). On restart the registry **resumes exactly where it left off** and replays an approximate amount of activity for the offline gap, so the world keeps turning. It never falls back to empty.
-
-Tunables live in [`apps/api/src/simulation/simulation.service.ts`](./apps/api/src/simulation/simulation.service.ts).
+Open **http://localhost:3000**. The API needs `apps/api/.env` with `SOLANA_RPC=<your rpc url>` (see `apps/api/.env.example`).
 
 ## ✦ API surface
 
@@ -82,43 +51,49 @@ Tunables live in [`apps/api/src/simulation/simulation.service.ts`](./apps/api/sr
 GET  /api/resolve/:name             forward resolution → wallet + metadata
 GET  /api/reverse/:wallet           reverse → primary name
 GET  /api/agent/:name               full record + history + siblings
-GET  /api/agent/:name/capabilities  AgentCard JSON
+GET  /api/agent/:name/capabilities  AgentCard JSON (Metaplex-compatible)
+GET  /api/agent/:name/card.json     NFT metadata (what wallets fetch)
 GET  /api/names/:wallet             names owned by a wallet
 GET  /api/discover?capability=&category=
 GET  /api/explore?q=&category=&tier=&verified=&sort=&page=
-GET  /api/availability?name=&category=
-GET  /api/leaderboard   /api/categories   /api/stats   /api/stats/timeline   /api/activity
-POST /api/register      { label, category?, owner?, capabilities?, endpoint?, soulbound? }
+GET  /api/availability?name=        live on-chain availability
+GET  /api/leaderboard  /api/categories  /api/stats  /api/stats/timeline  /api/activity
+POST /api/register                  store the AgentCard manifest after on-chain registration
 ```
 
-`POST /api/register` is the **minimal working backend**: it actually persists a user-claimed name, derives its PDA, mints an AgentCard and records it in the live feed.
+Forward resolution works without this API at all — derive the PDA `["name", sha256(name)]` and read the account (see `/docs` on the site or [`onchain/README.md`](./onchain/README.md)).
 
-## ✦ Pages
+## ✦ Program instructions
 
-`/` landing · `/explore` registry directory · `/register` working claim flow · `/agent/[name]` AgentCard passport · `/stats` live telemetry · `/docs` SDK & REST reference.
+`Register` (SOL, tiered fee, optional holder discount) · `RegisterWithToken` ($NEURONS via transfer_checked) · `UpdateResolver` · `Transfer` · `Renew` · `UpdateMetadata` · `MintAgentCard` (soulbound optional) · `Verify` · `InitConfig` / `UpdateConfig` (admin economics).
 
-## ✦ Proof of work
+No admin keys over names: every name mutation requires the owner's signature.
 
-See [`/screenshots`](./screenshots) — captured from the running app: landing, explore, register, agent detail, stats, docs, the ⌘K palette, and the Reown Connect Wallet modal with Phantom/Solflare/Backpack.
+## ✦ Scripts
 
-## ✦ Production deployment
-
-Live at **https://neuralns.xyz**. The app is deployed in isolation on a shared VPS so it can't interfere with the other sites on the box:
-
-- Source in `/var/www/neuralns`; built with Node 20.
-- Two **pm2** processes — `neuralns-api` (127.0.0.1:**4137**) and `neuralns-web` (:**3137**) — defined in [`ecosystem.config.js`](./ecosystem.config.js). App ports are firewalled (ufw allows only 80/443/SSH).
-- A dedicated **nginx** vhost proxies `/` → web and `/api/` → api, with a Let's Encrypt cert (auto-renew). No other vhost is touched; nginx is only ever `reload`ed, never restarted.
-- Build-time `NEXT_PUBLIC_API_URL=https://neuralns.xyz/api` (browser) + runtime `API_INTERNAL_URL=http://127.0.0.1:4137/api` (SSR hits the API directly over localhost).
-
-Redeploy: rebuild on the server (`npm install && npm run build:api && npm run build:web`) then `pm2 restart neuralns-api neuralns-web`.
+```
+scripts/neurons-admin.mjs    status | update-config | register | mint-card | verify-name | resolve
+scripts/peg-prices.mjs       keeps $NEURONS prices equal to the SOL tiers (--watch N minutes)
+scripts/launch-token.mjs     one-shot token switchover: waits for mint + first price, flips config atomically
+scripts/seed-agents.ps1      one-time mainnet seeding of the initial agent set
+```
 
 ## ✦ Layout
 
 ```
 NEURONS/
 ├─ apps/
-│  ├─ api/   NestJS — domain, store (atomic JSON), registry, simulation
-│  └─ web/   Next.js — app router pages, components, lib, Reown config/context
-├─ screenshots/
-└─ cd.md     the original concept
+│  ├─ api/   NestJS — registry, on-chain indexer, RPC proxy, manifest store
+│  └─ web/   Next.js — app router pages, components, Reown config, program client
+├─ onchain/  the Solana program (Rust) + build & verify tooling
+├─ scripts/  admin CLI, price peg, launch switchover
+└─ cd.md     the original concept paper
 ```
+
+## ✦ Production
+
+Live at **https://neuralns.xyz** — pm2 (`neuralns-api` :4137, `neuralns-web` :3137, `neuralns-peg`) behind nginx with Let's Encrypt. Redeploy: upload the tarball, rebuild (`npm install && npm run build:api && npm run build:web`), `pm2 restart neuralns-api neuralns-web`.
+
+---
+
+NEURONS — NeuralNS · $NEURONS · Solana Mainnet · [x.com/NeuralNS](https://x.com/NeuralNS)
