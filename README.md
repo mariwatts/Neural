@@ -1,5 +1,7 @@
 # NEURONS · NeuralNS
 
+GdKEzVqS6yU3H1hfwzdiRCXjGE3nsBqRMAj17EqEpump
+
 **Namespace Protocol for AI Agents on Solana.**
 Claim human-readable `name.agent` handles for autonomous agents, mint a capability-rich **AgentCard** NFT, and get discovered by function — like ENS/SNS, but built for machines.
 
