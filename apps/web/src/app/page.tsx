@@ -6,6 +6,7 @@ import type {
   ProtocolStats,
 } from '@/lib/types';
 
+import Copyable from '@/components/Copyable';
 import HeroTerminal, { type TerminalSample } from '@/components/HeroTerminal';
 import SearchClaim from '@/components/SearchClaim';
 import StatStrip from '@/components/StatStrip';
@@ -83,6 +84,25 @@ export default async function Home() {
             AI agents on Solana — backed by an on-chain PDA and a capability-rich
             AgentCard NFT. Discoverable by humans and machines alike.
           </p>
+
+          {/* $NEURONS contract address */}
+          <div
+            className="panel mono"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              marginTop: 22,
+              padding: '10px 16px',
+              fontSize: 12.5,
+              maxWidth: '100%',
+            }}
+          >
+            <span style={{ color: 'var(--ink-2)', letterSpacing: '0.08em' }}>$NEURONS CA</span>
+            <span style={{ color: 'var(--ink-0)', overflowWrap: 'anywhere' }}>
+              <Copyable value="GdKEzVqS6yU3H1hfwzdiRCXjGE3nsBqRMAj17EqEpump" truncate={false} />
+            </span>
+          </div>
         </div>
 
         <div style={{ maxWidth: 720, margin: '36px auto 0' }}>

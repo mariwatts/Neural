@@ -1,8 +1,8 @@
 const ROWS = [
-  { len: '1–4 chars', price: '$25', tier: 'Premium', expiry: 'Permanent', hot: true },
-  { len: '5–9 chars', price: '$5', tier: 'Standard', expiry: '1 year · renewable' },
-  { len: '10+ chars', price: '$2.5', tier: 'Accessible', expiry: '1 year · renewable' },
-  { len: 'Verified badge', price: '$1', tier: 'Add-on', expiry: 'One-time' },
+  { len: '1–4 chars', price: '5 ◎', tier: 'Premium', expiry: 'Permanent', hot: true },
+  { len: '5–9 chars', price: '1 ◎', tier: 'Standard', expiry: '1 year · renewable' },
+  { len: '10+ chars', price: '0.1 ◎', tier: 'Accessible', expiry: '1 year · renewable' },
+  { len: 'Verified badge', price: '0.01 ◎', tier: 'Add-on', expiry: 'One-time' },
 ];
 
 export default function TierTable() {
@@ -59,9 +59,8 @@ export default function TierTable() {
           color: 'var(--ink-2)',
         }}
       >
-        Prices are pegged to USD and charged in SOL at the live rate ·{' '}
-        <span style={{ color: 'var(--accent)' }}>$NEURONS</span> holders get 25% off —
-        paying in $NEURONS always includes the holder rate.
+        Pay in SOL or <span style={{ color: 'var(--accent)' }}>$NEURONS</span> —
+        holders get 25% off, and paying in $NEURONS always includes the holder rate.
       </div>
     </div>
   );

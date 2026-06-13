@@ -3,6 +3,7 @@ import { StoreService } from '../store/store.service';
 import { OnchainIndexerService } from '../indexer/onchain-indexer.service';
 import { Rng } from '../domain/rng';
 import { derivePda, metadataUri, sha256Hex } from '../domain/solana';
+import { buildAvatarSvg } from './avatar';
 import {
   expiryFor,
   priceForLabel,
@@ -152,7 +153,7 @@ export class RegistryService {
     const site = process.env.PUBLIC_SITE_URL || 'https://neuralns.xyz';
     return {
       ...rec.card,
-      image: `${site}/agentcard.png`,
+      image: `${site}/api/agent/${rec.name}/avatar.svg`,
       external_url: `${site}/agent/${rec.name}`,
     };
   }
@@ -166,13 +167,14 @@ export class RegistryService {
     const fqn = this.normalizeFqn(name);
     const rec = this.getByName(fqn);
     const site = process.env.PUBLIC_SITE_URL || 'https://neuralns.xyz';
+    const image = `${site}/api/agent/${fqn}/avatar.svg`;
     return {
       name: fqn,
       symbol: 'NEURONS',
       description:
         rec?.card.description ||
         `AgentCard for ${fqn} — on-chain identity in the NeuralNS .agent namespace on Solana.`,
-      image: `${site}/agentcard.png`,
+      image,
       external_url: `${site}/agent/${fqn}`,
       attributes: [
         { trait_type: 'tier', value: rec?.tier ?? 'unknown' },
@@ -185,9 +187,16 @@ export class RegistryService {
       ],
       properties: {
         category: 'image',
-        files: [{ uri: `${site}/agentcard.png`, type: 'image/png' }],
+        files: [{ uri: image, type: 'image/svg+xml' }],
       },
     };
+  }
+
+  /** Generative NFT art for a name — deterministic, store-independent. */
+  avatarSvg(name: string): string {
+    const fqn = this.normalizeFqn(name);
+    const rec = this.getByName(fqn);
+    return buildAvatarSvg(fqn, { verified: rec?.verified ?? false });
   }
 
   /** Full record + recent activity for the agent detail page. */

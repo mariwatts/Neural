@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Header,
   Param,
   Post,
   Query,
@@ -41,6 +42,14 @@ export class RegistryController {
   @Get('agent/:name/card.json')
   cardJson(@Param('name') name: string) {
     return this.registry.cardJson(name);
+  }
+
+  /** Deterministic generative NFT art — unique per name, pure function. */
+  @Get('agent/:name/avatar.svg')
+  @Header('Content-Type', 'image/svg+xml')
+  @Header('Cache-Control', 'public, max-age=86400')
+  avatarSvg(@Param('name') name: string) {
+    return this.registry.avatarSvg(name);
   }
 
   @Get('agent/:name')

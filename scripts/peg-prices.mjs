@@ -21,14 +21,14 @@ import {
   ComputeBudgetProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 
-// ── targets (USD) — edit here ──────────────────────────────────────────────
-export const PRICES_USD = {
-  premium: 25,    // 1-4 chars, permanent
-  standard: 5,    // 5-9 chars, per year
-  accessible: 2.5, // 10+ chars, per year
-  verify: 1,      // verified badge, one-time
+// ── targets (SOL, fixed — whitepaper tiers) — edit here ────────────────────
+export const PRICES_SOL = {
+  premium: 5,      // 1-4 chars, permanent
+  standard: 1,     // 5-9 chars, per year
+  accessible: 0.1, // 10+ chars, per year
+  verify: 0.01,    // verified badge, one-time
 };
-const DRIFT_BPS = 200; // update when stored price is >2% off target
+const DRIFT_BPS = 200; // update when stored token price is >2% off target
 // ───────────────────────────────────────────────────────────────────────────
 
 export const PROGRAM_ID = new PublicKey('5dqCWiZvLWD1Nge15UhXyGCGd2rF8uN6nPigdnLRWCv1');
@@ -128,25 +128,28 @@ export async function tick(dry) {
   if (!solUsd) throw new Error('no SOL/USD price');
   const tokUsd = hasToken ? px[cfg.tokenMint.toBase58()] : null;
 
-  const lam = (usd) => Math.round((usd / solUsd) * LAMPORTS_PER_SOL);
-  // token prices carry the holder discount baked in (token payer = holder)
+  // SOL prices are FIXED (whitepaper tiers); only the token leg floats:
+  // token amount = SOL price × SOL/USD ÷ token/USD, with the holder discount
+  // baked in (paying in $NEURONS means you hold it).
+  const lam = (sol) => Math.round(sol * LAMPORTS_PER_SOL);
   const tokenFactor = (10_000 - cfg.discountBps) / 10_000;
-  const raw = (usd) => (tokUsd ? BigInt(Math.round(((usd * tokenFactor) / tokUsd) * 10 ** cfg.tokenDecimals)) : 0n);
+  const raw = (sol) =>
+    tokUsd ? BigInt(Math.round(((sol * solUsd * tokenFactor) / tokUsd) * 10 ** cfg.tokenDecimals)) : 0n;
 
   const target = {
-    pricePremium: lam(PRICES_USD.premium),
-    priceStandard: lam(PRICES_USD.standard),
-    priceAccessible: lam(PRICES_USD.accessible),
-    verifyFee: lam(PRICES_USD.verify),
-    tokenPricePremium: raw(PRICES_USD.premium),
-    tokenPriceStandard: raw(PRICES_USD.standard),
-    tokenPriceAccessible: raw(PRICES_USD.accessible),
+    pricePremium: lam(PRICES_SOL.premium),
+    priceStandard: lam(PRICES_SOL.standard),
+    priceAccessible: lam(PRICES_SOL.accessible),
+    verifyFee: lam(PRICES_SOL.verify),
+    tokenPricePremium: raw(PRICES_SOL.premium),
+    tokenPriceStandard: raw(PRICES_SOL.standard),
+    tokenPriceAccessible: raw(PRICES_SOL.accessible),
   };
 
   console.log(`SOL $${solUsd}` + (tokUsd ? ` · token $${tokUsd}` : ' · token: no price'));
-  console.log(`targets: premium $${PRICES_USD.premium} = ${target.pricePremium / 1e9} SOL / ${target.tokenPricePremium} raw`);
-  console.log(`         standard $${PRICES_USD.standard} = ${target.priceStandard / 1e9} SOL / ${target.tokenPriceStandard} raw`);
-  console.log(`         accessible $${PRICES_USD.accessible} = ${target.priceAccessible / 1e9} SOL / ${target.tokenPriceAccessible} raw`);
+  console.log(`targets: premium ${PRICES_SOL.premium} SOL / ${target.tokenPricePremium} raw`);
+  console.log(`         standard ${PRICES_SOL.standard} SOL / ${target.tokenPriceStandard} raw`);
+  console.log(`         accessible ${PRICES_SOL.accessible} SOL / ${target.tokenPriceAccessible} raw`);
 
   const needs =
     drifted(cfg.pricePremium, target.pricePremium) ||

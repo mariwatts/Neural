@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 // NEURONS — token launch switchover.
 //
 // Run this the moment the real $NEURONS token launches (or even a bit before —
@@ -21,7 +21,7 @@ import {
   ComputeBudgetProgram, sendAndConfirmTransaction, LAMPORTS_PER_SOL,
 } from '@solana/web3.js';
 import {
-  PRICES_USD, SOL_MINT, PROGRAM_ID, conn, payer, configPda,
+  PRICES_SOL, SOL_MINT, PROGRAM_ID, conn, payer, configPda,
   parseConfig, configParamsBuf, usdPrices, tick,
 } from './peg-prices.mjs';
 
@@ -94,21 +94,21 @@ async function main() {
     ...cfg,
     tokenMint: MINT,
     tokenDecimals: decimals,
-    pricePremium: lam(PRICES_USD.premium),
-    priceStandard: lam(PRICES_USD.standard),
-    priceAccessible: lam(PRICES_USD.accessible),
-    verifyFee: lam(PRICES_USD.verify),
-    tokenPricePremium: raw(PRICES_USD.premium),
-    tokenPriceStandard: raw(PRICES_USD.standard),
-    tokenPriceAccessible: raw(PRICES_USD.accessible),
+    pricePremium: lam(PRICES_SOL.premium),
+    priceStandard: lam(PRICES_SOL.standard),
+    priceAccessible: lam(PRICES_SOL.accessible),
+    verifyFee: lam(PRICES_SOL.verify),
+    tokenPricePremium: raw(PRICES_SOL.premium),
+    tokenPriceStandard: raw(PRICES_SOL.standard),
+    tokenPriceAccessible: raw(PRICES_SOL.accessible),
     // discount threshold: hold ≥ $HOLDER_USD worth (no discount baked here)
     holderMinBalance: BigInt(Math.round((HOLDER_USD / tokUsd) * 10 ** decimals)),
   };
 
   console.log('switching config to the new token:');
-  console.log(`  premium    $${PRICES_USD.premium} = ${Number(p.tokenPricePremium) / 10 ** decimals} tokens / ${p.pricePremium / 1e9} SOL`);
-  console.log(`  standard   $${PRICES_USD.standard} = ${Number(p.tokenPriceStandard) / 10 ** decimals} tokens / ${p.priceStandard / 1e9} SOL`);
-  console.log(`  accessible $${PRICES_USD.accessible} = ${Number(p.tokenPriceAccessible) / 10 ** decimals} tokens / ${p.priceAccessible / 1e9} SOL`);
+  console.log(`  premium    $${PRICES_SOL.premium} = ${Number(p.tokenPricePremium) / 10 ** decimals} tokens / ${p.pricePremium / 1e9} SOL`);
+  console.log(`  standard   $${PRICES_SOL.standard} = ${Number(p.tokenPriceStandard) / 10 ** decimals} tokens / ${p.priceStandard / 1e9} SOL`);
+  console.log(`  accessible $${PRICES_SOL.accessible} = ${Number(p.tokenPriceAccessible) / 10 ** decimals} tokens / ${p.priceAccessible / 1e9} SOL`);
   console.log(`  holder discount from ${Number(p.holderMinBalance) / 10 ** decimals} tokens (~$${HOLDER_USD})`);
 
   if (DRY) {
