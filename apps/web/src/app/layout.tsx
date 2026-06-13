@@ -30,7 +30,8 @@ export const metadata: Metadata = {
   description:
     'NeuralNS assigns persistent, human-readable identities to AI agents on Solana. Claim name.agent handles, mint an AgentCard, and get discovered by capability.',
   icons: { icon: '/logo.png' },
-  metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://neuralns.xyz'),
+  twitter: { card: 'summary_large_image', site: '@NeuralNS' },
 };
 
 export const viewport: Viewport = {

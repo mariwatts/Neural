@@ -10,6 +10,20 @@ import Copyable from '@/components/Copyable';
 
 export const dynamic = 'force-dynamic';
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ name: string }>;
+}) {
+  const { name } = await params;
+  const decoded = decodeURIComponent(name);
+  const fqn = decoded.endsWith('.agent') ? decoded : `${decoded}.agent`;
+  return {
+    title: `${fqn} — NEURONS AgentCard`,
+    description: `On-chain identity for ${fqn} in the NeuralNS .agent namespace on Solana — owner, capabilities, AgentCard NFT and verification status.`,
+  };
+}
+
 export default async function AgentPage({
   params,
 }: {
