@@ -267,6 +267,25 @@ if (cmd === 'status') {
     data,
   })]);
   console.log('AgentCard NFT mint:', card.toBase58());
+} else if (cmd === 'create-treasury-ata') {
+  // Create the treasury's ATA for the CONFIGURED payment token (idempotent).
+  // Required once after every token swap — RegisterWithToken transfers into it.
+  const cfg = await getConfig();
+  if (cfg.tokenMint.equals(PublicKey.default)) throw new Error('no token configured');
+  const tAta = ata(cfg.treasury, cfg.tokenMint);
+  await send([new TransactionInstruction({
+    programId: ATA_PROGRAM,
+    keys: [
+      { pubkey: payer.publicKey, isSigner: true, isWritable: true },
+      { pubkey: tAta, isSigner: false, isWritable: true },
+      { pubkey: cfg.treasury, isSigner: false, isWritable: false },
+      { pubkey: cfg.tokenMint, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      { pubkey: TOKEN22, isSigner: false, isWritable: false },
+    ],
+    data: u8(1), // CreateIdempotent
+  })]);
+  console.log('treasury ATA ready:', tAta.toBase58());
 } else if (cmd === 'verify-name') {
   const name = process.argv[3];
   const cfg = await getConfig();

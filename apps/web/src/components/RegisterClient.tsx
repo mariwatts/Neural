@@ -8,6 +8,7 @@ import { api, API_BASE } from '@/lib/api';
 import {
   buildMintCardIx,
   buildRegisterIx,
+  buildTreasuryAtaIx,
   configTokenBalance,
   getProgramConfig,
   namePda,
@@ -186,7 +187,9 @@ export default function RegisterClient({
         setError('That name is already registered on-chain — try another.');
         return;
       }
-      const tx = new Transaction().add(ix);
+      const tx = new Transaction();
+      if (payToken) tx.add(buildTreasuryAtaIx(payer, cfg));
+      tx.add(ix);
       let card: string | undefined;
       if (mintCard) {
         const built = await buildMintCardIx(payer, name, soulbound);

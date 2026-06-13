@@ -205,6 +205,27 @@ export async function buildRegisterIx(
   };
 }
 
+/**
+ * Idempotent ATA create for the treasury's payment-token account — bundled
+ * before RegisterWithToken so a freshly swapped token never breaks payments
+ * (no-op if the account already exists).
+ */
+export function buildTreasuryAtaIx(payer: PublicKey, cfg: ProgramConfig): TransactionInstruction {
+  if (!cfg.tokenMint) throw new Error('Token payments are not enabled.');
+  return new TransactionInstruction({
+    programId: ATA_PROGRAM_ID,
+    keys: [
+      { pubkey: payer, isSigner: true, isWritable: true },
+      { pubkey: ataFor(cfg.treasury, cfg.tokenMint), isSigner: false, isWritable: true },
+      { pubkey: cfg.treasury, isSigner: false, isWritable: false },
+      { pubkey: cfg.tokenMint, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_2022_ID, isSigner: false, isWritable: false },
+    ],
+    data: Buffer.from([1]), // CreateIdempotent
+  });
+}
+
 /** MintAgentCard — Token-2022 NFT for a registered name (bundle after register). */
 export async function buildMintCardIx(
   owner: PublicKey,
