@@ -61,6 +61,8 @@ export default function TierTable() {
       >
         Pay in SOL or <span style={{ color: 'var(--accent)' }}>$NEURONS</span> —
         holders get 25% off, and paying in $NEURONS always includes the holder rate.
+        <strong style={{ color: 'var(--ink-0)' }}> 100% of $NEURONS fees are burned on-chain</strong> —
+        supply leaves circulation in the same transaction.
       </div>
     </div>
   );

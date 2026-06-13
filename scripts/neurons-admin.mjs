@@ -233,7 +233,8 @@ if (cmd === 'status') {
   ];
   if (cmd === 'register-token') {
     keys.push(
-      { pubkey: cfg.tokenMint, isSigner: false, isWritable: false },
+      // mint writable: the program burns the fee
+      { pubkey: cfg.tokenMint, isSigner: false, isWritable: true },
       { pubkey: ata(payer.publicKey, cfg.tokenMint), isSigner: false, isWritable: true },
       { pubkey: ata(cfg.treasury, cfg.tokenMint), isSigner: false, isWritable: true },
       { pubkey: TOKEN22, isSigner: false, isWritable: false },

@@ -184,7 +184,8 @@ export async function buildRegisterIx(
     if (!cfg.tokenMint) throw new Error('Token payments are not enabled.');
     tag = 1;
     keys.push(
-      { pubkey: cfg.tokenMint, isSigner: false, isWritable: false },
+      // mint is writable: the program BURNS the fee (supply decreases on-chain)
+      { pubkey: cfg.tokenMint, isSigner: false, isWritable: true },
       { pubkey: ataFor(payer, cfg.tokenMint), isSigner: false, isWritable: true },
       { pubkey: ataFor(cfg.treasury, cfg.tokenMint), isSigner: false, isWritable: true },
       { pubkey: TOKEN_2022_ID, isSigner: false, isWritable: false },

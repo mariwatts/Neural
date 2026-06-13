@@ -167,7 +167,7 @@ await sendAndConfirmTransaction(conn, new Transaction().add(ix), [payer]);`}</Bl
             <Endpoints
               rows={[
                 ['IX', 'Register { name, resolver, years, metadata_uri }', 'Create the PDA, pay the tiered SOL fee; optional holder discount'],
-                ['IX', 'RegisterWithToken { … }', 'Same, fee paid in the configured token (Token-2022 transfer_checked)'],
+                ['IX', 'RegisterWithToken { … }', 'Fee paid in $NEURONS — 100% burned on-chain (BurnChecked) in the same tx'],
                 ['IX', 'UpdateResolver { resolver }', 'Repoint resolution (owner signs)'],
                 ['IX', 'Transfer { new_owner }', 'Change owner (owner signs)'],
                 ['IX', 'Renew { years }', 'Extend expiry, pay the tiered fee'],

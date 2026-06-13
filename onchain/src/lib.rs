@@ -9,7 +9,7 @@
 //! Instructions:
 //!   Register            — SOL fee by length tier (1-4 chars permanent, 5-9 / 10+ yearly);
 //!                         optional trailing [mint, payer_ata] applies the holder discount.
-//!   RegisterWithToken   — full fee paid in the configured SPL / Token-2022 token.
+//!   RegisterWithToken   — fee paid in the configured token; 100% of it is BURNED.
 //!   UpdateResolver / Transfer / Renew / UpdateMetadata — owner-signed mutations.
 //!   MintAgentCard       — mints the AgentCard as a Token-2022 NFT (0 decimals,
 //!                         metadata extension, optional non-transferable/soulbound).
@@ -350,9 +350,11 @@ fn register(
             return Err(RegistryError::BadTokenAccount.into());
         }
         if token_due > 0 {
-            // TransferChecked = tag 12: [12, amount u64le, decimals u8]
+            // 100% of token fees are BURNED — supply leaves circulation forever,
+            // verifiable in every payment transaction.
+            // BurnChecked = tag 15: [15, amount u64le, decimals u8]
             let mut data = Vec::with_capacity(10);
-            data.push(12u8);
+            data.push(15u8);
             data.extend_from_slice(&token_due.to_le_bytes());
             data.push(cfg.token_decimals);
             invoke(
@@ -360,14 +362,14 @@ fn register(
                     program_id: *token_program.key,
                     accounts: vec![
                         AccountMeta::new(*payer_ata.key, false),
-                        AccountMeta::new_readonly(*mint.key, false),
-                        AccountMeta::new(*treasury_ata.key, false),
+                        AccountMeta::new(*mint.key, false),
                         AccountMeta::new_readonly(*payer.key, true),
                     ],
                     data,
                 },
-                &[payer_ata.clone(), mint.clone(), treasury_ata.clone(), payer.clone()],
+                &[payer_ata.clone(), mint.clone(), payer.clone()],
             )?;
+            msg!("burned {} raw token units", token_due);
         }
     } else {
         // Optional holder discount: trailing [mint, payer_ata].

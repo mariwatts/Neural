@@ -386,7 +386,8 @@ export default function RegisterClient({
 
         <p style={{ fontSize: 11.5, color: 'var(--ink-3)', marginTop: 12, lineHeight: 1.5, textAlign: 'center' }}>
           Real on-chain registration on Solana mainnet — you sign in your wallet.
-          The fee goes to the protocol treasury; the name resolves immediately.
+          SOL fees go to the protocol treasury; <strong>$NEURONS fees are 100% burned</strong> in
+          the same transaction. The name resolves immediately.
         </p>
       </div>
 
